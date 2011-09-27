@@ -1,4 +1,5 @@
 var parsed = [], total = 0, inc, current;
+var fs = require('fs'), http = require('http'), url = require('url');
 
 function csv(line) {
     var matches, value, csv = []
@@ -16,7 +17,7 @@ function csv(line) {
     return csv;
 }
 
-inc = require('fs').readFileSync('inc.csv').toString().split('\r\n');
+inc = fs.readFileSync('inc.csv').toString().split('\r\n');
 
 inc.shift(); //Header
 
@@ -41,12 +42,19 @@ inc.forEach(function (line) {
     ++total;
 });
 
-require('http').createServer(function (request, response) {
+http.createServer(function (request, response) {
+    var url_obj = url.parse(request.url, true);
+    var json_resp = JSON.stringify(
+        parsed[Math.round(total * Math.random())]);
+    var callback = url_obj.query["callback"];
 
-    response.writeHead(200, {'content-type': 'application/json'});
-    response.end(JSON.stringify(
-        parsed[Math.round(total * Math.random())]
-    ));
-
-}).listen(process.env.PORT || 3000);
+    if (callback) {
+        var jsonp = callback + "(" + json_resp + ");";
+        response.writeHead(200, {'content-type': 'text/plain'});
+        response.end(jsonp);
+    } else {
+        response.writeHead(200, {'content-type': 'application/json'});
+        response.end(json_resp);
+    }
+}).listen(process.env.PORT || 8080);
 
