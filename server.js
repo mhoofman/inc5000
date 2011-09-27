@@ -50,11 +50,11 @@ http.createServer(function (request, response) {
 
     if (callback) {
         var jsonp = callback + "(" + json_resp + ");";
-        response.writeHead(200, {'content-type': 'text/plain'});
+        response.writeHead(200, {'content-type': 'application/javascript'});
         response.end(jsonp);
     } else {
         response.writeHead(200, {'content-type': 'application/json'});
         response.end(json_resp);
     }
-}).listen(process.env.PORT || 8080);
+}).listen(process.env.PORT || 3000);
 
